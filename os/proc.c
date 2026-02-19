@@ -2,6 +2,7 @@
 #include "defs.h"
 #include "loader.h"
 #include "trap.h"
+#include "timer.h"
 
 struct proc pool[NPROC];
 char kstack[NPROC][PAGE_SIZE];
@@ -65,6 +66,8 @@ found:
 	memset(&p->context, 0, sizeof(p->context));
 	memset(p->trapframe, 0, PAGE_SIZE);
 	memset((void *)p->kstack, 0, PAGE_SIZE);
+	memset(p->syscall_times, 0, sizeof(p->syscall_times));
+	p->start_time = 0;  // will be set when first scheduled
 	p->context.ra = (uint64)usertrapret;
 	p->context.sp = p->kstack + PAGE_SIZE;
 	return p;
@@ -86,6 +89,9 @@ void scheduler(void)
 				*/
 				p->state = RUNNING;
 				current_proc = p;
+				if(p->start_time == 0) {
+                    p->start_time = get_time();  // record first schedule time
+                }
 				swtch(&idle.context, &p->context);
 			}
 		}

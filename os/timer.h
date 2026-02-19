@@ -10,6 +10,7 @@
 uint64 get_cycle();
 void timer_init();
 void set_next_timer();
+int get_time(void);
 
 typedef struct {
 	uint64 sec; // 自 Unix 纪元起的秒数
